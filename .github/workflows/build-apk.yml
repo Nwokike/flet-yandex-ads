@@ -73,7 +73,11 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: Pre-compile extension wheel
+        run: uv build --wheel --out-dir wheels/ .
       - name: Build APK (split per ABI)
+        env:
+          PIP_FIND_LINKS: ${{ github.workspace }}/wheels
         working-directory: examples/flet_yandex_ads_example
         run: |
           uv run flet build apk --python-version 3.14 --yes \
