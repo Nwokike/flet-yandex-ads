@@ -30,7 +30,7 @@ class RewardedAd(ft.Service, FullscreenAd):
             non-mobile platform.
     """
 
-    on_reward: Optional[ft.ControlEventHandler[RewardEvent["RewardedAd"]]] = None
+    on_reward: Optional[ft.EventHandler[RewardEvent["RewardedAd"]]] = None
     """
     Called when the user earns a reward.
 

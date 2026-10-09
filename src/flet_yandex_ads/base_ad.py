@@ -28,7 +28,7 @@ class BaseAd(ft.BaseControl):
     """Called when an ad is successfully loaded."""
 
     on_load_failed: Optional[
-        ft.ControlEventHandler[AdRequestErrorEvent["BaseAd"]]
+        ft.EventHandler[AdRequestErrorEvent["BaseAd"]]
     ] = None
     """
     Called when an ad request fails.

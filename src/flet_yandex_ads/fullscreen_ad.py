@@ -19,7 +19,7 @@ class FullscreenAd(BaseAd):
     on_shown: Optional[ft.ControlEventHandler["FullscreenAd"]] = None
     """Called when the ad is shown."""
 
-    on_failed_to_show: Optional[ft.ControlEventHandler[AdErrorEvent["FullscreenAd"]]] = None
+    on_failed_to_show: Optional[ft.EventHandler[AdErrorEvent["FullscreenAd"]]] = None
     """
     Called when the ad fails to show.
 
@@ -30,7 +30,7 @@ class FullscreenAd(BaseAd):
     on_dismiss: Optional[ft.ControlEventHandler["FullscreenAd"]] = None
     """Called when the ad is dismissed."""
 
-    on_impression: Optional[ft.ControlEventHandler[ImpressionEvent["FullscreenAd"]]] = None
+    on_impression: Optional[ft.EventHandler[ImpressionEvent["FullscreenAd"]]] = None
     """
     Called when an impression occurs.
 

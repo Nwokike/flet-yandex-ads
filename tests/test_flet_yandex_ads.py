@@ -1,6 +1,7 @@
 """Tests for flet-yandex-ads: control classes, defaults, type names and events."""
 
 import flet as ft
+from flet.controls.control_event import ControlEvent, get_event_field_type
 from flet.utils import from_dict
 
 import flet_yandex_ads as fya
@@ -192,3 +193,80 @@ def test_event_dataclasses_from_dict():
     )
     assert reward.amount == 5
     assert reward.type == "coins"
+
+
+# ---------------------------------------------------------------------------
+# Typed event resolution — regression test for the
+# "'Event' object has no attribute ..." crash class.
+#
+# A typed handler must be declared with ft.EventHandler (not
+# ft.ControlEventHandler): ControlEventHandler[X] double-wraps X in Event[...],
+# so the resolver returns Event[X], from_dict then drops the generic and the
+# handler receives a plain Event with no payload fields.
+# ---------------------------------------------------------------------------
+
+TYPED_EVENTS = [
+    # (control factory, field, event class, dart payload dict)
+    (lambda: fya.BannerAd(unit_id="b"), "on_load", BannerLoadedEvent,
+     {"width": 320, "height": 50}),
+    (lambda: fya.BannerAd(unit_id="b"), "on_impression", ImpressionEvent,
+     {"impression_data": "{}"}),
+    (lambda: fya.InterstitialAd(unit_id="i"), "on_load_failed", AdRequestErrorEvent,
+     {"code": 1, "description": "no fill", "ad_unit_id": "i"}),
+    (lambda: fya.InterstitialAd(unit_id="i"), "on_failed_to_show", AdErrorEvent,
+     {"description": "bad state"}),
+    (lambda: fya.InterstitialAd(unit_id="i"), "on_impression", ImpressionEvent,
+     {"impression_data": "{}"}),
+    (lambda: fya.RewardedAd(unit_id="r"), "on_reward", RewardEvent,
+     {"amount": 5, "type": "coins"}),
+]
+
+
+def test_typed_events_resolve_to_dataclass():
+    """get_event_field_type must return the dataclass, not Event[...]."""
+    for factory, field, event_cls, _ in TYPED_EVENTS:
+        control = factory()
+        resolved = get_event_field_type(control, field)
+        assert resolved is not None, f"{field} did not resolve"
+        assert resolved != ControlEvent, f"{field} fell back to ControlEvent"
+        # from_dict drops generic aliases to their base class; the base of
+        # BannerLoadedEvent[ForwardRef] is BannerLoadedEvent, of Event[X] is Event
+        base = getattr(resolved, "__origin__", resolved)
+        assert base is event_cls, (
+            f"{field} resolved to {resolved!r} (base {base!r}), "
+            f"expected {event_cls!r} — use ft.EventHandler, not ft.ControlEventHandler"
+        )
+
+
+def test_typed_events_dispatch_with_fields():
+    """A full dispatch must build the dataclass with every payload field set."""
+    for factory, field, event_cls, payload in TYPED_EVENTS:
+        control = factory()
+        resolved = get_event_field_type(control, field)
+        event = from_dict(
+            resolved, {"control": control, "name": field.removeprefix("on_"), **payload}
+        )
+        assert isinstance(event, event_cls), f"{field}: got {type(event).__name__}"
+        for key, value in payload.items():
+            assert getattr(event, key) == value, f"{field}.{key}"
+
+
+def test_typed_event_handler_receives_fields():
+    """The exact failure the user hit: e.width must exist inside the handler."""
+    banner = fya.BannerAd(unit_id="b")
+    seen = []
+    banner.on_load = lambda e: seen.append((e.width, e.height))
+    resolved = get_event_field_type(banner, "on_load")
+    event = from_dict(
+        resolved, {"control": banner, "name": "load", "width": 320, "height": 50}
+    )
+    banner.on_load(event)
+    assert seen == [(320, 50)]
+
+
+def test_plain_handlers_stay_plain():
+    """Plain handlers keep ControlEventHandler and receive the Event object."""
+    inter = fya.InterstitialAd(unit_id="i")
+    for field in ("on_click", "on_shown", "on_dismiss"):
+        resolved = get_event_field_type(inter, field)
+        assert resolved is not None, f"{field} did not resolve"

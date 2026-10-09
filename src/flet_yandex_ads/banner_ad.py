@@ -41,7 +41,7 @@ class BannerAd(ft.LayoutControl, BaseAd):
     third of the screen height.
     """
 
-    on_load: Optional[ft.ControlEventHandler[BannerLoadedEvent["BannerAd"]]] = None
+    on_load: Optional[ft.EventHandler[BannerLoadedEvent["BannerAd"]]] = None
     """
     Called when the banner loads.
 
@@ -49,7 +49,7 @@ class BannerAd(ft.LayoutControl, BaseAd):
     banner ``width`` and ``height``.
     """
 
-    on_impression: Optional[ft.ControlEventHandler[ImpressionEvent["BannerAd"]]] = None
+    on_impression: Optional[ft.EventHandler[ImpressionEvent["BannerAd"]]] = None
     """
     Called when an impression occurs.
 
