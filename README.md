@@ -101,6 +101,33 @@ reward = await rw.wait_for_dismiss()   # RewardEvent(amount=..., type=...) or No
 
 Yandex needs no manifest keys or Info.plist entries for basic operation — the SDK injects its permissions automatically. Mediation adapters are added to the generated Flutter app's Gradle config; see the [plugin docs](https://ads.yandex.com/helpcenter/en/dev/flutter/) for the maven repositories and `com.yandex.android:mobileads-mediation` dependency.
 
+## Writing your own event handlers
+
+Handlers come in two flavors, and the annotation matters:
+
+```python
+# Plain handler — receives the Event; payload (if any) is in e.data
+BannerAd(unit_id="R-M-XXXXXX-Y", on_click=lambda e: print(e.data))
+
+# Typed handler — receives the dataclass with its fields
+BannerAd(
+    unit_id="R-M-XXXXXX-Y",
+    on_load=lambda e: print(f"{e.width}x{e.height}"),
+)
+```
+
+Typed handlers must be declared with `ft.EventHandler[SomeEvent]`, **not**
+`ft.ControlEventHandler[SomeEvent]`. `ControlEventHandler[X]` wraps `X` in
+`Event[...]`, so Flet's resolver returns `Event[X]`, drops the generic when
+building the event, and your handler receives a plain `Event` with no fields —
+`e.width` raises `AttributeError`. (The official `flet-ads` 1.0.4 has this bug
+in its `on_paid` handler; we deliberately deviate from it.)
+
+Available typed events: `BannerLoadedEvent` (width, height),
+`AdRequestErrorEvent` (code, description, ad_unit_id), `AdErrorEvent`
+(description), `ImpressionEvent` (impression_data — the ILRD payload),
+`RewardEvent` (amount, type).
+
 ## Limitations
 
 - **Android + iOS only.** AdMob and all other Flutter ad plugins are mobile-only; Android TV (CTV) is supported only by Yandex's native Android SDK, not the Flutter plugin.
