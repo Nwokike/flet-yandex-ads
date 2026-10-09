@@ -1,0 +1,33 @@
+[project]
+name = "flet-yandex-ads"
+version = "0.1.0"
+description = "Display Yandex Mobile Ads in Flet apps."
+readme = "README.md"
+authors = [
+    { name = "Onyeka Nwokike", email = "nwokikeonyeka@gmail.com" }
+]
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "flet",
+]
+
+[project.urls]
+Homepage = "https://github.com/Nwokike/flet-yandex-ads"
+Repository = "https://github.com/Nwokike/flet-yandex-ads"
+Issues = "https://github.com/Nwokike/flet-yandex-ads/issues"
+
+[tool.setuptools.package-data]
+"flutter.flet_yandex_ads" = ["**/*"]
+
+[tool.setuptools]
+license-files = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]

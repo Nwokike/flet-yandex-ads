@@ -1,0 +1,23 @@
+[project]
+name = "flet-yandex-ads-example"
+version = "0.1.0"
+description = "Example app for flet-yandex-ads: sticky/inline banner, interstitial and rewarded ads."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flet>=1.0.0",
+    "flet-yandex-ads",
+]
+
+[tool.uv.sources]
+flet-yandex-ads = { path = "../..", editable = true }
+
+[tool.flet]
+org = "ng.kiri"
+product = "Flet Yandex Ads Example"
+build_number = 1
+
+[dependency-groups]
+dev = [
+    "flet-cli",
+]
