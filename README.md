@@ -14,6 +14,22 @@ uv add flet-yandex-ads
 
 The native code comes transitively from the `yandex_mobileads` plugin — nothing to install manually.
 
+## Test it before you integrate it
+
+Every release builds an unsigned **test APK** (split per ABI) of the example
+app, with Yandex demo ad units baked in — download, sideload, and every ad
+format is live immediately, no account needed:
+
+**Download the latest test APK:**
+[**yandexadsexample-arm64-v8a.apk** (latest release)](https://github.com/Nwokike/flet-yandex-ads/releases/latest/download/yandexadsexample-arm64-v8a.apk)
+
+(Also available: `armeabi-v7a` for older phones, `x86_64` for emulators —
+see the [latest release](https://github.com/Nwokike/flet-yandex-ads/releases/latest).)
+
+The demo ad units (`demo-banner-yandex` etc.) serve real test ads. Swap them
+for your own ad block IDs (`R-M-XXXXXX-Y`) from the
+[partner interface](https://partner.yandex.com/) for production.
+
 ## Quick start
 
 ```python

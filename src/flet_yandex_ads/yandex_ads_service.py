@@ -54,6 +54,17 @@ class YandexAdsService(ft.Service):
     Defaults to ``False``.
     """
 
+    on_initialized: Optional[ft.ControlEventHandler["YandexAdsService"]] = None
+    """Called when the Mobile Ads SDK finishes initializing."""
+
+    on_init_failed: Optional[ft.ControlEventHandler["YandexAdsService"]] = None
+    """
+    Called when SDK initialization fails.
+
+    Event handler argument :attr:`~flet.Event.data` contains the error
+    description.
+    """
+
     async def initialize(self):
         """
         Initialize the Mobile Ads SDK.

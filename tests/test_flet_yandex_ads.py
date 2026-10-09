@@ -126,6 +126,22 @@ def test_service_with_settings():
     assert service.logging is True
 
 
+def test_service_on_initialized():
+    seen = []
+    service = fya.YandexAdsService(on_initialized=lambda e: seen.append("ok"))
+    assert service.on_initialized is not None
+    service.on_initialized(None)
+    assert seen == ["ok"]
+
+
+def test_service_on_init_failed():
+    seen = []
+    service = fya.YandexAdsService(on_init_failed=lambda e: seen.append(e.data))
+    assert service.on_init_failed is not None
+    service.on_init_failed({"description": "boom"})
+    assert seen == ["boom"]
+
+
 def test_enum_serialization_values():
     """Enum values must match the wire strings read by the Dart side."""
     assert BannerSizeType.STICKY.value == "sticky"

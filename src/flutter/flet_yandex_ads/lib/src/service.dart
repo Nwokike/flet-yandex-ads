@@ -47,12 +47,22 @@ class YandexAdsService extends FletService {
 
   /// Initializes the SDK (idempotent — the plugin itself guards against
   /// double initialization).
+  ///
+  /// The success flag is set only after initialize() returns: if it fails,
+  /// the flag is reset so a retry can happen, and the failure is surfaced
+  /// via the `init_failed` event. (The plugin caches its init future, so
+  /// without this the service could hang forever on a poisoned future.)
   Future<void> initializeSdk() async {
     if (_initialized) return;
-    _initialized = true;
-
-    await _applyPrivacyFlags();
-    await YandexAds.initialize();
+    try {
+      await _applyPrivacyFlags();
+      await YandexAds.initialize();
+      _initialized = true;
+      control.triggerEvent("initialized");
+    } catch (e) {
+      _initialized = false;
+      control.triggerEvent("init_failed", {"description": e.toString()});
+    }
   }
 
   Future<dynamic> _invokeMethod(String name, dynamic args) async {

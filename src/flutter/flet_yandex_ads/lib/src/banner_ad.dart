@@ -79,7 +79,12 @@ class _BannerAdControlState extends State<BannerAdControl> with FletStoreMixin {
     // Make sure the SDK is initialized before the first load; the call is
     // idempotent and normally already done by YandexAdsService.
     await YandexAds.initialize();
-    banner.load(AdRequest(adUnitId: _unitId));
+    await banner.load(AdRequest(adUnitId: _unitId));
+    // The plugin assigns the AndroidView/UiKitView platform view inside
+    // load() — it only mounts (and the ad request only fires) once the
+    // widget rebuilds with it. Force that rebuild here, otherwise the
+    // platform view never mounts and no event ever comes back.
+    if (mounted) setState(() {});
   }
 
   Future<dynamic> _invokeMethod(String name, dynamic args) async {
