@@ -24,9 +24,19 @@ Every release builds an unsigned test APK of the example app with Yandex demo ad
 
 | Platform | Windows | macOS | Linux | iOS | Android | Android TV | Web |
 |----------|---------|-------|-------|-----|---------|------------|-----|
-| Supported|    ❌    |   ❌   |   ❌   |  ✅  |    ✅    |     ⚠️     |  ❌  |
+| Supported|    ❌    |   ❌   |   ❌   |  ✅  |    ✅    |     ✅     |  ❌  |
 
-⚠️ Android TV runs and attempts to serve ads (the SDK is an Android SDK), but fill rate and remote-control focus are untested — try the APK above on a TV and see.
+**Android TV is tested and working.** All four ad formats (sticky banner, inline
+banner, interstitial, rewarded) serve on TV and fullscreen ads can be closed
+with the remote. App-open ads also serve, though closing them is slightly less
+convenient than the rest. TV fill rate is device/region-dependent — the demo
+units in the test APK fill, but real fill depends on Yandex's TV demand in
+your users' regions.
+
+Desktop and Web are unsupported **upstream**: the `yandex_mobileads` Flutter
+plugin only implements Android and iOS, and throws `UnsupportedError` on
+other platforms. The extension's platform guard turns that crash into a clean
+message.
 
 ## Usage
 
