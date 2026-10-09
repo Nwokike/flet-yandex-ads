@@ -135,11 +135,13 @@ def test_service_on_initialized():
 
 
 def test_service_on_init_failed():
+    from types import SimpleNamespace
+
     seen = []
     service = fya.YandexAdsService(on_init_failed=lambda e: seen.append(e.data))
     assert service.on_init_failed is not None
-    service.on_init_failed({"description": "boom"})
-    assert seen == ["boom"]
+    service.on_init_failed(SimpleNamespace(data={"description": "boom"}))
+    assert seen == [{"description": "boom"}]
 
 
 def test_enum_serialization_values():
