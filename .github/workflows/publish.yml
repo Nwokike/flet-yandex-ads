@@ -1,0 +1,40 @@
+name: Publish to PyPI
+
+on:
+  # Releases are created by build-apk.yml using GITHUB_TOKEN, and GitHub
+  # does not let GITHUB_TOKEN-created events trigger other workflows —
+  # so publishing never fired from `release:` and needed a manual dispatch
+  # every time. Tag pushes fire this directly instead.
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/p/flet-yandex-ads
+
+    # Required for PyPI Trusted Publisher authentication
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
