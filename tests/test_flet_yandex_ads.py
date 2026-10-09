@@ -270,3 +270,60 @@ def test_plain_handlers_stay_plain():
     for field in ("on_click", "on_shown", "on_dismiss"):
         resolved = get_event_field_type(inter, field)
         assert resolved is not None, f"{field} did not resolve"
+
+
+# ---------------------------------------------------------------------------
+# Android TV is supported on purpose (the SDK is an Android SDK; Flet reports
+# TV as a separate platform that is_mobile() does not cover).
+# ---------------------------------------------------------------------------
+
+class _FakePage:
+    def __init__(self, platform, web=False):
+        self.platform = platform
+        self.web = web
+
+
+def _patch_page(monkeypatch, platform, web=False):
+    """Give controls a page-like parent so before_update() can run."""
+    fake = _FakePage(platform, web)
+    monkeypatch.setattr(ft.BaseControl, "page", property(lambda self: fake))
+
+
+def test_android_tv_allowed(monkeypatch):
+    """A control attached to an Android TV page must not raise before_update."""
+    _patch_page(monkeypatch, ft.PagePlatform.ANDROID_TV)
+    for control in (
+        fya.BannerAd(unit_id="b"),
+        fya.InterstitialAd(unit_id="i"),
+        fya.RewardedAd(unit_id="r"),
+        fya.AppOpenAd(unit_id="a"),
+        fya.YandexAdsService(),
+    ):
+        control.before_update()  # must NOT raise
+
+
+def test_phones_still_allowed(monkeypatch):
+    _patch_page(monkeypatch, ft.PagePlatform.ANDROID)
+    fya.BannerAd(unit_id="b").before_update()
+    _patch_page(monkeypatch, ft.PagePlatform.IOS)
+    fya.BannerAd(unit_id="b").before_update()
+
+
+def test_web_still_blocked(monkeypatch):
+    _patch_page(monkeypatch, ft.PagePlatform.ANDROID, web=True)
+    try:
+        fya.BannerAd(unit_id="b").before_update()
+        raised = False
+    except ft.FletUnsupportedPlatformException:
+        raised = True
+    assert raised, "Web must still be blocked"
+
+
+def test_desktop_still_blocked(monkeypatch):
+    _patch_page(monkeypatch, ft.PagePlatform.WINDOWS)
+    try:
+        fya.YandexAdsService().before_update()
+        raised = False
+    except ft.FletUnsupportedPlatformException:
+        raised = True
+    assert raised, "Desktop must still be blocked"

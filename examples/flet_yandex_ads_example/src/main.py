@@ -32,7 +32,16 @@ def main(page: ft.Page):
     page.scroll = ft.ScrollMode.AUTO
     page.padding = 16
 
-    mobile = not page.web and page.platform.is_mobile()
+    # Android TV counts as mobile here: the Yandex SDK is an Android SDK and
+    # the plugin renders through the Android platform interface, so ads can
+    # be attempted on TV. Whether they fill on TV is exactly what we test.
+    mobile = (
+        not page.web
+        and (
+            page.platform.is_mobile()
+            or page.platform == ft.PagePlatform.ANDROID_TV
+        )
+    )
     unit_ids = DEMO_AD_UNIT_IDS.get(page.platform, DEMO_AD_UNIT_IDS[ft.PagePlatform.ANDROID])
 
     log_text = ft.Text(

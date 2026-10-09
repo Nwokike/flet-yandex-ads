@@ -42,8 +42,15 @@ class BaseAd(ft.BaseControl):
 
     def before_update(self):
         super().before_update()
-        if self.page.web or not self.page.platform.is_mobile():
+        # Android TV is allowed on purpose: the Yandex SDK is an Android SDK
+        # and the Flutter plugin renders through the Android platform interface,
+        # so ads can be attempted on TV. TV fill rate and remote-control focus
+        # are untested territory — that is what the example app is for.
+        if self.page.web or (
+            not self.page.platform.is_mobile()
+            and self.page.platform != ft.PagePlatform.ANDROID_TV
+        ):
             raise ft.FletUnsupportedPlatformException(
                 f"{self.__class__.__name__} is only supported on "
-                f"Mobile (Android and iOS)"
+                f"Mobile (Android, Android TV and iOS)"
             )
