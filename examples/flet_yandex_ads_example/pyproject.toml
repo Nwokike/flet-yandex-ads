@@ -17,6 +17,9 @@ org = "ng.kiri"
 product = "Flet Yandex Ads Example"
 build_number = 1
 
+[tool.flet.app]
+path = "src"
+
 [dependency-groups]
 dev = [
     "flet-cli",
